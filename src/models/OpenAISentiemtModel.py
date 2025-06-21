@@ -11,7 +11,6 @@ class OpenAISentiemtModel(BaseDataModel):
         super().__init__(db_client=db_client)
         self.collection = self.db_client[DataBaseEnum.COLLECTION_SENTIMENT.value]
 
-
     
     def load_model(self):
 
@@ -77,8 +76,7 @@ class OpenAISentiemtModel(BaseDataModel):
             return False , f"Error: Could not get sentiment ({e})"
         
 
-    async def insert_prediction(self, sentiment_prediction: SentimentPrediction):
-        print("Collection type:", type(self.collection))  # Debug
+    async def insert_prediction(self, sentiment_prediction: SentimentPrediction  ):
         result = await self.collection.insert_one(sentiment_prediction.dict())
         if result.inserted_id:
             return {"message": "Prediction inserted successfully", "id": str(result.inserted_id)}
