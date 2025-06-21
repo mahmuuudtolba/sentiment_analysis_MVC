@@ -2,7 +2,7 @@ from enum import Enum
 
 class ModelEnum(Enum):
     MODEL_NAME = "openai/gpt-4o-mini"
-    ENDPOINT = "https://models.github.ai/inference"
+    MODEL_ENDPOINT = "https://models.github.ai/inference"
     CLIENT_INIT="OpenAI client initialized."
     
     OPENAI_NAUTRAL = "Neutral (no input)"

@@ -1,6 +1,7 @@
-from fastapi import FastAPI , APIRouter , Depends , UploadFile, status 
+from fastapi import FastAPI , APIRouter , Depends , UploadFile, status ,Request
 from fastapi.responses import JSONResponse
 from models import OpenAISentiemtModel , ModelEnum
+from models import SentimentPrediction
 import os
 import logging
 from pydantic import BaseModel
@@ -17,10 +18,12 @@ perdict_router = APIRouter(
 class TextRequest(BaseModel):
     text: str
 
-@perdict_router.post("/text/")
-async def analyze_sentiment(request: TextRequest):
-
-    isvalid , results = OpenAISentiemtModel().predict_sentiment(text=request.text)
+@perdict_router.post("/sentiment/")
+async def analyze_sentiment( request : Request , text_request: TextRequest):
+    openai_sentiment_model = OpenAISentiemtModel(
+        db_client=request.app.db_client
+    )
+    isvalid , results = openai_sentiment_model.predict_sentiment(text=text_request.text)
     if not isvalid :
         return JSONResponse(
                 status_code= status.HTTP_400_BAD_REQUEST,
@@ -29,6 +32,22 @@ async def analyze_sentiment(request: TextRequest):
                 } 
 
             )
-    else:
-        return {"text" : request.text , 
-                "results" : results}
+    
+    print(f"Here are the results : {results}")
+
+
+    response = await openai_sentiment_model.insert_prediction(
+            SentimentPrediction(
+                sentiment_text= text_request.text , 
+                result=results
+            )
+    )
+
+
+
+
+    return {
+            "text" : text_request.text , 
+            "results" : results , 
+            "response" : response
+            }

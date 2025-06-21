@@ -1,15 +1,23 @@
 from openai import OpenAI
 from helper import Settings
-from .ModelEnum import ModelEnum
+from .enums.ModelEnum import ModelEnum
+from .enums.DataBaseEnum import DataBaseEnum
+from .BaseDataModel import BaseDataModel
 import re
+from .db_schemes.SentimentPrediction import SentimentPrediction
+class OpenAISentiemtModel(BaseDataModel):
 
-class OpenAISentiemtModel:
+    def __init__(self , db_client:object):
+        super().__init__(db_client=db_client)
+        self.collection = self.db_client[DataBaseEnum.COLLECTION_SENTIMENT.value]
+
+
     
     def load_model(self):
 
 
         client = OpenAI(
-            base_url= ModelEnum.ENDPOINT.value , 
+            base_url= ModelEnum.MODEL_ENDPOINT.value , 
             api_key= Settings().GITHUB_TOKEN
         )
 
@@ -67,6 +75,16 @@ class OpenAISentiemtModel:
         except Exception as e:
             print(e)
             return False , f"Error: Could not get sentiment ({e})"
+        
+
+    async def insert_prediction(self, sentiment_prediction: SentimentPrediction):
+        print("Collection type:", type(self.collection))  # Debug
+        result = await self.collection.insert_one(sentiment_prediction.dict())
+        if result.inserted_id:
+            return {"message": "Prediction inserted successfully", "id": str(result.inserted_id)}
+        else:
+            return {"message": "Insertion failed"}
+
         
         
         

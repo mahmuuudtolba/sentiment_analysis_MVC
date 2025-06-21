@@ -5,6 +5,9 @@ class Settings(BaseSettings):
     APP_VERSION:str
     APP_NAME:str
 
+    MONGODB_URL : str
+    MONGODB_DATABASE : str
+
 
     model_config = SettingsConfigDict(env_file=".env")
 
